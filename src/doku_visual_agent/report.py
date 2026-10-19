@@ -65,7 +65,8 @@ def render_html(plan: dict) -> str:
         parts.append(
             f'<section><h2>{h(scene["id"])} · {h(scene["visual_type"])}</h2>'
             f'<blockquote>{h(scene["narration"])}</blockquote>'
-            f'<p><b>Visual-Regel:</b> {h(scene["guidance"])}</p>'\n            f'<p><b>Visualziel:</b> {h(scene.get("visual_goal", "") or "regelbasiert")}</p>'
+            f'<p><b>Visual-Regel:</b> {h(scene["guidance"])}</p>'
+            f'<p><b>Visualziel:</b> {h(scene.get("visual_goal", "") or "regelbasiert")}</p>'
             f'<p class="small"><b>Suchaufträge:</b> {h(query_text or "Keine: Datenbeleg für Diagramm erforderlich")}</p>'
             f'<div class="assets">{"".join(items)}</div></section>'
         )
