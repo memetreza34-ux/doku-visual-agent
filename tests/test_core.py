@@ -71,8 +71,9 @@ class PlanningTests(unittest.TestCase):
                               "Verified in original photograph")
 
     def test_specific_scene_blocks_symbol_photo_approval(self):
-        plan = build_plan("Volkswagen Werk in Wolfsburg.")
-        # Use a deterministic LIVE-mode plan with a known candidate.
+        # No network access in unit tests: simulate live-mode data from a local fixture.
+        plan = build_plan("Volkswagen Werk in Wolfsburg.", fixture=[asset().__dict__])
+        plan["mode"] = "LIVE_SEARCH_UNREVIEWED"
         plan["scenes"][0]["candidates"] = [
             {"asset": asset().__dict__, "review_status": "pending"}
         ]
