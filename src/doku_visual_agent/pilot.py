@@ -224,7 +224,7 @@ def prepare_pilot(manifest_path: Path, output: Path, voiceover: Path,
         "rights_review_required": True,
         "quality_review_required": True,
         "timing_quality": "word_count_estimate",
-        "voice_quality": "technical_tts_only",
+        "voice_quality": "external_audio_requires_listening",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "notice": "REAL COMMONS IMAGES – NOT PUBLISHABLE; rights, exact depictions and audio must be reviewed.",
     }

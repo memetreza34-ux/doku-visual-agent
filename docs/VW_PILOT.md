@@ -16,17 +16,28 @@ Vier dokumentarische Aufnahmen, deren Commons-Seiten Urheber und Lizenz angeben:
 
 Die Originalseiten nennen Kamerajahr, Urheber und Lizenz. Unser CLI prüft bei Abruf automatisch die *gemeldeten* Lizenzfelder und den Urheber gegen die Shotlist – es garantiert nicht die rechtliche Durchsetzbarkeit einer Lizenz.
 
+### Optionale natürliche Sprecherstimme (Gemini TTS)
+
+Für eine natürlichere Teststimme lässt sich statt `espeak-ng` die offizielle Gemini-TTS-API verwenden. Dafür ist ein eigener API-Schlüssel nötig; die Nutzung kann Kosten verursachen. Ein Skript bleibt exakt die Textvorlage, aber eine hörbare Qualitäts-/Wortlautkontrolle ist trotzdem Pflicht.
+
+```bash
+export GEMINI_API_KEY="DEIN_KEY"
+python -m doku_visual_agent tts-gemini --script runs/pilot/narration.txt --output runs/pilot/narration.wav --voice Kore
+```
+
+Das Modul verwendet `gemini-3.8-flash-tts` über Googles dokumentierte Interactions-API und akzeptiert nur gültige WAV-Dateien. Ohne Schlüssel bleibt der kostenlose, aber deutlich weniger natürliche `espeak-ng`-Test nutzbar. Die laufenden GitHub-Actions-Tests geben bewusst kein Geld für Gemini aus.
+
 ## Technischer Ablauf
 
-1. \`pilot-script\`: Lesbare Sprecherdatei \`narration.txt\` aus \`examples/vw_wolfsburg_pilot.json\`.
-2. \`espeak-ng\`: rein technische **deutsche Robotik-Teststimme**, keine professionelle KI-Stimme.
-3. \`pilot-prepare\`: Wikimedia-API über exakte \`File:\`-Titel, Prüfung von Lizenz, Urheber und CDN, Download der 1600px-Bildversionen. Nur ausgewählte, explizit kuratierte Titel, kein willkürliches Web-Scraping.
+1. `pilot-script`: Lesbare Sprecherdatei `narration.txt` aus `examples/vw_wolfsburg_pilot.json`.
+2. `espeak-ng`: rein technische **deutsche Robotik-Teststimme**, keine professionelle KI-Stimme.
+3. `pilot-prepare`: Wikimedia-API über exakte `File:`-Titel, Prüfung von Lizenz, Urheber und CDN, Download der 1600px-Bildversionen. Nur ausgewählte, explizit kuratierte Titel, kein willkürliches Web-Scraping.
 4. Wortanzahl-basierte Szenendauern (keine Wort-Synchronität), Bild-Zooms + beschriftete Zeitstrahlgrafiken in Remotion.
-5. MP4 technisch über \`ffprobe\` prüfen, Quellenjournal und Pilotvideo als GitHub-Actions-Artefakt (7 Tage) bereitstellen.
+5. MP4 technisch über `ffprobe` prüfen, Quellenjournal und Pilotvideo als GitHub-Actions-Artefakt (7 Tage) bereitstellen.
 
 ### Sicherheit / Qualitätslücken
 
-- **Nicht veröffentlichen.** Rechte (Namensnennung, Lizenzlink, Bearbeitung, ShareAlike, Personen/Marken) vor Veröffentlichung vollständig prüfen und umsetzen. Das Video hat explizit \`publication_ready=false\`.
+- **Nicht veröffentlichen.** Rechte (Namensnennung, Lizenzlink, Bearbeitung, ShareAlike, Personen/Marken) vor Veröffentlichung vollständig prüfen und umsetzen. Das Video hat explizit `publication_ready=false`.
 - Historische Angaben gelten nur für den redaktionellen Entwurf und müssen nochmals mit Originalquellen gegengeprüft werden.
 - Audiotiming wird nach Wortanzahl approximiert, keine WhisperX-Unterteilung; technisch billige Stimme dient ausschließlich dem Integrationstest.
 - Es gibt noch **kein** echtes lizenzsicheres Video-B-Roll im Pilot. Das muss später ergänzend geprüft werden.
