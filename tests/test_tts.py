@@ -57,7 +57,9 @@ class TTSTests(unittest.TestCase):
             def __enter__(self): return self
             def __exit__(self,*a): return False
             def read(self,n): return data
-        with patch("doku_visual_agent.tts.urllib.request.urlopen",return_value=Resp()):
+        class Opener:
+            def open(self, *args, **kwargs): return Resp()
+        with patch("doku_visual_agent.tts.urllib.request.build_opener", return_value=Opener()):
             with tempfile.TemporaryDirectory() as d:
                 p=Path(d)/"script.txt";p.write_text("Das ist eine korrekt vertonte deutsche Doku.",encoding="utf-8")
                 target=save_tts(p,Path(d)/"voice.wav","temporary-key")
