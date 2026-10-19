@@ -176,6 +176,27 @@ class VisionIntegrationTests(TestCase):
         self.assertEqual(candidate["review_status"], "pending")
         self.assertFalse(plan["publication_ready"])
 
+    def test_global_budget_prevents_excess_api_calls(self):
+        plan = build_plan("Elektroautos benötigen Batterien.\n\nElektroautos benötigen Batterien.",
+                          fixture=[mkasset("p1"), mkasset("p2")])
+        plan["mode"] = "LIVE_SEARCH_UNREVIEWED"
+        # The first two images are considered; a later scene is not billed.
+        inspector = FakeInspector({
+            "p1": VisionResult("relevant", "Batterie", "passend", ()),
+            "p2": VisionResult("relevant", "Batterie", "passend", ()),
+        })
+        inspect_plan(plan, inspector, per_scene=2, max_total=1)
+        self.assertEqual(len(inspector.calls), 1)
+        self.assertEqual(plan["vision_summary"]["attempted"], 1)
+        self.assertGreaterEqual(plan["vision_summary"]["skipped_global_budget"], 1)
+        self.assertFalse(plan["publication_ready"])
+
+    def test_global_budget_validation(self):
+        plan = build_plan("Elektroautos benötigen Batterien.", fixture=[mkasset("p1")])
+        plan["mode"] = "LIVE_SEARCH_UNREVIEWED"
+        with self.assertRaisesRegex(ValueError, "Globales Limit"):
+            inspect_plan(plan, FakeInspector({}), max_total=0)
+
     def test_video_is_single_preview_not_full_content(self):
         sample = mkasset("p2")
         sample["kind"] = "video"

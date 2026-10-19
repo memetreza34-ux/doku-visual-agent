@@ -204,7 +204,7 @@ def inspect_candidate(scene: Scene, asset: Asset, *, allow_weak: bool = False) -
         "metadata_score": round(score, 3),
         "usage_label": "Symbolbild" if scene.visual_type == "generic_broll" else "Originalbeleg prüfen",
         "review_status": "pending",
-        "why": f"{overlap} passende Skript-Metadaten-Begriffe; Bildinhalt noch nicht geprüft",
+        "why": f"{overlap} passende Skript-Metadaten-Begriffe; separate Bildprüfung erforderlich",
     }
 
 

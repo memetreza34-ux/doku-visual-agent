@@ -11,7 +11,7 @@
 
 - Gemini-Modell standardmäßig `gemini-2.5-flash`, konfigurierbar mit `--gemini-model`.
 - Nur mit gesetztem lokalem `GEMINI_API_KEY`; kein API-Key im Repo, Bericht oder Query-URL.
-- Maximal 1–6 Bilder pro Szene (Standard 3), maximal 3 MB Vorschaubild; ausschließlich JPEG, PNG, WebP mit passender Dateisignatur.
+- Maximal 1–6 Bilder pro Szene (Standard 3) und maximal 20 Bildprüfungen insgesamt (konfigurierbar 1–100), maximal 3 MB Vorschaubild; ausschließlich JPEG, PNG, WebP mit passender Dateisignatur.
 - HTTPS, Host-Allowlist `images.pexels.com` oder `upload.wikimedia.org`; Redirects an andere Hosts sowie nicht standardmäßige Ports blockiert.
 - Modell- und Transportfehler werden sichtbar angezeigt, sie erzeugen nie ein grünes Publikationssignal.
 - Bildvorschauen können Daten Dritter enthalten: Bei `--vision` werden sie zum KI-Anbieter übertragen.

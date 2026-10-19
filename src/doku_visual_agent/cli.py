@@ -23,6 +23,8 @@ def make_parser() -> argparse.ArgumentParser:
     plan.add_argument("--vision", action="store_true", help="Echte Bilder mit Gemini prüfen (API-Kosten möglich)")
     plan.add_argument("--semantic", action="store_true", help="LLM-gestützte Szenensuche (API-Kosten möglich)")
     plan.add_argument("--vision-per-scene", type=int, default=3)
+    plan.add_argument("--max-vision-total", type=int, default=20,
+                      help="Maximale Gemini-Bildanfragen insgesamt (1-100)")
     plan.add_argument("--gemini-model", default="gemini-2.5-flash")
     plan.add_argument("--fixture", type=Path,
                       help="Nur Test/Demo: lokale künstliche Bilddaten statt Internet.")
@@ -53,7 +55,7 @@ def main(argv: list[str] | None = None) -> int:
                                 semantic_client=gemini if args.semantic else None,
                                 vision_enabled=args.vision)
             if args.vision:
-                report = inspect_plan(report, GeminiVision(gemini), args.vision_per_scene)
+                report = inspect_plan(report, GeminiVision(gemini), args.vision_per_scene, args.max_vision_total)
             save_plan(report, args.output)
             save_html(report, args.output)
             print(f"Erstellt: {args.output / 'plan.json'}")

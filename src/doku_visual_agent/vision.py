@@ -194,18 +194,27 @@ class GeminiVision:
                             tuple(str(x)[:180] for x in uncertainties[:5]))
 
 
-def inspect_plan(plan: dict[str, Any], inspector: Any, per_scene: int = 3) -> dict[str, Any]:
+def inspect_plan(plan: dict[str, Any], inspector: Any, per_scene: int = 3,
+                 max_total: int = 20) -> dict[str, Any]:
     """Annotate existing plan in place. No auto-approval; all candidates remain visible."""
     if per_scene < 1 or per_scene > 6:
         raise ValueError("Maximale Bildprüfungen pro Szene: 1 bis 6.")
+    if max_total < 1 or max_total > 100:
+        raise ValueError("Globales Limit: 1 bis 100 Bildprüfungen.")
     if plan.get("mode") != "LIVE_SEARCH_UNREVIEWED":
         raise ValueError("Bildprüfung ist für künstliche Demo-Assets gesperrt.")
-    total, errors, mismatches = 0, 0, 0
+    total, errors, mismatches, attempted, skipped = 0, 0, 0, 0, 0
     for scene in plan.get("scenes", []):
         for idx, candidate in enumerate(scene.get("candidates", [])):
             candidate["vision"] = {"status": "not_checked", "note": "Keine KI-Bildprüfung durchgeführt."}
             if idx >= per_scene:
+                candidate["vision"]["note"] = "Pro-Szene-Prüflimit erreicht."
                 continue
+            if attempted >= max_total:
+                skipped += 1
+                candidate["vision"]["note"] = "Globales KI-Kostenlimit erreicht; nicht geprüft."
+                continue
+            attempted += 1
             asset = candidate["asset"]
             try:
                 decision: VisionResult = inspector.inspect(scene, asset)
@@ -236,7 +245,9 @@ def inspect_plan(plan: dict[str, Any], inspector: Any, per_scene: int = 3) -> di
             c["review_status"] == "rejected_by_vision" for c in scene["candidates"]
         ):
             scene["state"] = "needs_research_or_graphic"
-    plan["vision_summary"] = {"checked": total, "mismatches": mismatches,
-                              "errors": errors, "auto_approved": 0}
+    plan["vision_summary"] = {"checked": total, "attempted": attempted,
+                              "mismatches": mismatches, "errors": errors,
+                              "skipped_global_budget": skipped,
+                              "max_total": max_total, "auto_approved": 0}
     plan["publication_ready"] = False
     return plan

@@ -69,10 +69,10 @@ Du benötigst dafür einen optionalen Gemini-API-Key: https://aistudio.google.co
 ```bash
 export GEMINI_API_KEY="DEIN_API_KEY"
 export PEXELS_API_KEY="DEIN_PEXELS_KEY"
-python -m doku_visual_agent plan --script examples/volkswagen_60s.txt --output runs/vw-vision --semantic --vision --vision-per-scene 2
+python -m doku_visual_agent plan --script examples/volkswagen_60s.txt --output runs/vw-vision --semantic --vision --vision-per-scene 2 --max-vision-total 20
 ```
 
-- `--vision-per-scene 2` begrenzt Bildprüfungen auf 2 je Szene (erlaubt: 1–6). Jede Anfrage kann Kosten verursachen.
+- `--vision-per-scene 2` begrenzt Bildprüfungen auf 2 je Szene (1–6). `--max-vision-total 20` begrenzt zusätzlich den gesamten Durchlauf (1–100). Jede Anfrage kann Kosten verursachen.
 - Die Offline-Demo verwendet künstliche Datensätze und **kann nicht** als echte Visionprüfung verwendet werden.
 - Die Bildprüfung stuft optisch irrelevante Treffer als `unrelated` ein. Diese können nicht normal freigegeben werden.
 - Alle anderen Bilder bleiben **redaktionell und lizenzrechtlich zu prüfen**. Ein KI-Bildurteil beweist niemals die Echtheit eines spezifischen Unternehmensstandorts, eines Ereignisses oder ein Nutzungsrecht.
