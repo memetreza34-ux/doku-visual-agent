@@ -124,12 +124,15 @@ class PilotTests(unittest.TestCase):
         info["thumburl"] = "https://commons.wikimedia.org/w/thumb.php?f=example.jpg&w=1600"
         self.assertEqual(verify_metadata(scene, info)["url"], info["thumburl"])
 
-    def test_bogus_media_host_blocked(self):
+    def test_bogus_media_host_is_never_used(self):
         scene = MANIFEST["scenes"][0]
         bogus = fake_info(scene)
         bogus["thumburl"] = "https://localhost/secret.jpg"
-        with self.assertRaisesRegex(PilotError, "Wikimedia CDN"):
-            verify_metadata(scene, bogus)
+        safe = verify_metadata(scene, bogus)["url"]
+        self.assertTrue(safe.startswith("https://commons.wikimedia.org/wiki/Special:FilePath/"))
+        self.assertNotIn("localhost", safe)
+        with self.assertRaisesRegex(PilotError, "Nicht erlaubte"):
+            download_photo("https://localhost/secret.jpg")
 
     def test_photo_download_rejects_non_image(self):
         class Resp:
