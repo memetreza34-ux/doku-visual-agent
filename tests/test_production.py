@@ -30,6 +30,8 @@ def fixture_plan():
 def live_setup(path: Path, *, approved=True, rejected=False):
     plan = fixture_plan()
     plan["mode"] = "LIVE_SEARCH_UNREVIEWED"
+    # Pretend the test fixture was returned from a real provider; no network in unit tests.
+    plan["scenes"][0]["candidates"][0]["asset"]["demo_only"] = False
     if rejected:
         plan["scenes"][0]["candidates"][0]["review_status"] = "rejected_by_vision"
     save_plan(plan, path)
@@ -149,7 +151,7 @@ class PrepareRenderTests(unittest.TestCase):
                "evidence":"Geschäftsbericht mit Einheiten geprüft",
                "values":[{"label":"2024","value":2},{"label":"2025","value":3}]}
         self.assertEqual(len(_verified_chart(scene,chart)["values"]),2)
-        with self.assertRaisesRegex(ValueError,"Quellen"):
+        with self.assertRaisesRegex(ValueError,"Quelle"):
             _verified_chart(scene,{**chart,"reviewed":False})
         with self.assertRaisesRegex(ValueError,"ungültige"):
             _verified_chart(scene,{**chart,"values":[
