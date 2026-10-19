@@ -9,16 +9,16 @@
 - Keine automatische Freigabe, keine unprotokollierten Fallbacks
 - Sichtungsboard mit Originalquellen; dokumentierbare manuelle Freigaben
 
-## Nächste Umsetzung (Phase 1B, noch offen)
+## Phase 1B – technische Integration, noch keine Live-Abnahme
 
-- Aktuelle Fakten recherchieren und mit offiziellen Quellen/Datumsangaben belegen
-- Szenensemantik mit LLM und strukturiertem JSON-Schema; regelbasierter Fallback
-- Visuelle Bildinhaltsanalyse der Kandidaten (Vision-Modell)
-- Abgleich von visueller Beschreibung gegen genaue Sprecher-Aussage
+- **Offen:** Aktuelle Fakten recherchieren und mit offiziellen Quellen/Datumsangaben belegen
+- **Implementiert:** Opt-in Gemini-Suchsemantik mit strukturiertem JSON und regelbasiertem Fallback
+- **Implementiert:** Opt-in Gemini-Vorschaubildanalyse, nur für geprüfte CDN-Domains
+- **Implementiert:** Szenenabgleich mit nachvollziehbarem KI-Urteil, ohne Quelle/Identität zu behaupten
 - Frühzeitig Duplikate (pHash) filtern; Bildqualität messen
 - Snapshot/Hash von Lizenzen und Quellinformationen für Audit
 - Authentische Belege stärker bewerten als bloßes Stock-B-Roll
-- Bewertung mit annotiertem Goldstandard aus echten Pilotvideos
+- **Teilweise:** 24 kuratierte Skriptszenen sowie Vision-Tests mit Mock-Antworten. **Offen:** reale Bilder bewerten und unabhängige Präzisionsmessung
 
 ## Danach (Phase 2)
 

@@ -10,6 +10,7 @@ import sys
 
 from .pipeline import approve_asset, build_plan, save_plan
 from .report import save_html
+from .vision import GeminiJSON, GeminiVision, inspect_plan
 
 
 def make_parser() -> argparse.ArgumentParser:
@@ -19,6 +20,12 @@ def make_parser() -> argparse.ArgumentParser:
     plan = subs.add_parser("plan", help="Suchplan + HTML-Sichtung erzeugen")
     plan.add_argument("--script", type=Path, required=True)
     plan.add_argument("--output", type=Path, required=True)
+    plan.add_argument("--vision", action="store_true", help="Echte Bilder mit Gemini prüfen (API-Kosten möglich)")
+    plan.add_argument("--semantic", action="store_true", help="LLM-gestützte Szenensuche (API-Kosten möglich)")
+    plan.add_argument("--vision-per-scene", type=int, default=3)
+    plan.add_argument("--max-vision-total", type=int, default=20,
+                      help="Maximale Gemini-Bildanfragen insgesamt (1-100)")
+    plan.add_argument("--gemini-model", default="gemini-2.5-flash")
     plan.add_argument("--fixture", type=Path,
                       help="Nur Test/Demo: lokale künstliche Bilddaten statt Internet.")
     approve = subs.add_parser("approve", help="Manuell geprüften Treffer protokollieren")
@@ -39,8 +46,16 @@ def main(argv: list[str] | None = None) -> int:
             fixture = json.loads(args.fixture.read_text(encoding="utf-8")) if args.fixture else None
             if fixture is not None and not isinstance(fixture, list):
                 raise ValueError("Fixture muss eine JSON-Liste von Asset-Objekten sein.")
+            if args.vision and fixture is not None:
+                raise ValueError("Visionanalyse ist für künstliche Demo-Assets gesperrt.")
+            api_key = os.getenv("GEMINI_API_KEY", "")
+            gemini = GeminiJSON(api_key, args.gemini_model) if (args.vision or args.semantic) else None
             report = build_plan(script, pexels_key=os.getenv("PEXELS_API_KEY", ""),
-                                fixture=fixture)
+                                fixture=fixture,
+                                semantic_client=gemini if args.semantic else None,
+                                vision_enabled=args.vision)
+            if args.vision:
+                report = inspect_plan(report, GeminiVision(gemini), args.vision_per_scene, args.max_vision_total)
             save_plan(report, args.output)
             save_html(report, args.output)
             print(f"Erstellt: {args.output / 'plan.json'}")

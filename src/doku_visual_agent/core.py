@@ -65,6 +65,8 @@ class Scene:
     year: str
     tasks: tuple[SearchTask, ...]
     guidance: str
+    visual_goal: str = ""
+    semantic_note: str = ""
 
 
 @dataclass(frozen=True)
@@ -173,7 +175,7 @@ def make_scenes(script: str) -> list[Scene]:
     return scenes
 
 
-def inspect_candidate(scene: Scene, asset: Asset) -> dict[str, Any] | None:
+def inspect_candidate(scene: Scene, asset: Asset, *, allow_weak: bool = False) -> dict[str, Any] | None:
     if not asset.source_url.startswith("https://"):
         return None
     metadata = f"{asset.title} {asset.description}"
@@ -189,7 +191,8 @@ def inspect_candidate(scene: Scene, asset: Asset) -> dict[str, Any] | None:
         return None
     overlap = len(target & terms)
     if not overlap and not (required & terms):
-        return None
+        if not (allow_weak and scene.visual_type == "generic_broll"):
+            return None
     # This is a metadata relevance score, never a visual verification/confidence percentage.
     score = round(10 * overlap / max(1, len(target)) + 2 * len(required & terms), 3)
     if asset.kind == "video" and scene.visual_type == "generic_broll":
@@ -201,15 +204,16 @@ def inspect_candidate(scene: Scene, asset: Asset) -> dict[str, Any] | None:
         "metadata_score": round(score, 3),
         "usage_label": "Symbolbild" if scene.visual_type == "generic_broll" else "Originalbeleg prüfen",
         "review_status": "pending",
-        "why": f"{overlap} passende Skript-Metadaten-Begriffe; Bildinhalt noch nicht geprüft",
+        "why": f"{overlap} passende Skript-Metadaten-Begriffe; separate Bildprüfung erforderlich",
     }
 
 
 def select_candidates(scene: Scene, assets: list[Asset], limit: int = 4,
-                      already_seen: set[str] | None = None) -> list[dict[str, Any]]:
+                      already_seen: set[str] | None = None,
+                      allow_weak: bool = False) -> list[dict[str, Any]]:
     seen = already_seen if already_seen is not None else set()
     ranked = [x for asset in assets if asset.id not in seen
-              if (x := inspect_candidate(scene, asset)) is not None]
+              if (x := inspect_candidate(scene, asset, allow_weak=allow_weak)) is not None]
     ranked.sort(key=lambda item: (-item["metadata_score"], item["asset"]["id"]))
     results = []
     local_ids: set[str] = set()
