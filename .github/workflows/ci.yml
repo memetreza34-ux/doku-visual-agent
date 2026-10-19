@@ -53,6 +53,10 @@ jobs:
         working-directory: remotion
         run: |
           npx remotion render src/index.jsx DokuVideo ../runs/ci/DEMO-1s.mp4 --props ../runs/ci/render/props.json --public-dir ../runs/ci/render/public --frames=0-29 --log=error --concurrency=1
+      - name: Install FFprobe for codec verification
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
       - name: Inspect actual MP4
         run: |
           test -s runs/ci/DEMO-1s.mp4
