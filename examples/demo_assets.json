@@ -1,0 +1,37 @@
+[
+  {
+    "id": "demo:commons:vw-wolfsburg", "provider": "commons", "kind": "photo",
+    "title": "Volkswagen Wolfsburg factory overview", "description": "Volkswagen industrial site in Wolfsburg",
+    "creator": "DEMO", "source_url": "https://example.org/demo/vw-wolfsburg",
+    "preview_url": "", "media_url": "", "license_name": "DEMO / NO LICENSE",
+    "license_url": "", "attribution": "DEMO ONLY"
+  },
+  {
+    "id": "demo:pexels:robot", "provider": "pexels", "kind": "video",
+    "title": "Automotive factory robots in car production", "description": "Robot arms on automotive factory assembly line",
+    "creator": "DEMO", "source_url": "https://example.org/demo/robot-broll",
+    "preview_url": "", "media_url": "", "license_name": "DEMO / NO LICENSE",
+    "license_url": ""
+  },
+  {
+    "id": "demo:commons:history", "provider": "commons", "kind": "photo",
+    "title": "Volkswagen factory 1960 historic Wolfsburg", "description": "Volkswagen archival car factory picture year 1960",
+    "creator": "DEMO", "source_url": "https://example.org/demo/archiv",
+    "preview_url": "", "media_url": "", "license_name": "DEMO / NO LICENSE",
+    "license_url": ""
+  },
+  {
+    "id": "demo:pexels:generic", "provider": "pexels", "kind": "photo",
+    "title": "Electric vehicle battery manufacturing", "description": "Battery module line in automotive industry",
+    "creator": "DEMO", "source_url": "https://example.org/demo/ev",
+    "preview_url": "", "media_url": "", "license_name": "DEMO / NO LICENSE",
+    "license_url": ""
+  },
+  {
+    "id": "demo:commons:wrong", "provider": "commons", "kind": "photo",
+    "title": "BMW factory Munich", "description": "BMW main plant in Munich",
+    "creator": "DEMO", "source_url": "https://example.org/demo/bmw",
+    "preview_url": "", "media_url": "", "license_name": "DEMO / NO LICENSE",
+    "license_url": ""
+  }
+]

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doku-visual-agent"
+version = "0.1.0"
+description = "Evidence-first visual discovery and review for documentary videos"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "Doku Visual Agent contributors"}]
+dependencies = []
+
+[project.scripts]
+doku-visual-agent = "doku_visual_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
