@@ -9,6 +9,8 @@ from pathlib import Path
 import sys
 
 from .pipeline import approve_asset, build_plan, save_plan
+from .production import prepare_render
+from .scriptwriter import generate_script, save_draft
 from .report import save_html
 from .vision import GeminiJSON, GeminiVision, inspect_plan
 
@@ -35,6 +37,20 @@ def make_parser() -> argparse.ArgumentParser:
     approve.add_argument("--role", choices=["exakt", "symbolbild"], required=True)
     approve.add_argument("--license-evidence", required=True)
     approve.add_argument("--visual-evidence", required=True)
+    production = subs.add_parser("prepare-render", help="Freigegebene Visuals und Stimme für Remotion aufbereiten")
+    production.add_argument("--run", type=Path, required=True)
+    production.add_argument("--output", type=Path, required=True)
+    production.add_argument("--assets", type=Path, help="JSON Bindings aus Szenen-ID -> freigegebenes Asset")
+    production.add_argument("--media-root", type=Path, help="Lokaler Ordner rechtmäßig verfügbarer Mediendateien")
+    production.add_argument("--voiceover", type=Path, help="Sprecherdatei (MP3, WAV, M4A)")
+    production.add_argument("--timings", type=Path, help="Optionale geprüfte Szenendauern in Sekunden als JSON")
+    production.add_argument("--demo", action="store_true", help="Nur Offline-Fixture: grafische DEMO ohne reale Medien")
+    production.add_argument("--fps", type=int, default=30)
+    draft = subs.add_parser("draft-script", help="Quellengebundenen KI-Skriptentwurf erstellen")
+    draft.add_argument("--brief", type=Path, required=True, help="Textdatei mit Thema und Story-Winkel")
+    draft.add_argument("--sources", type=Path, required=True, help="Manuell geprüfte Faktennotizen als JSON")
+    draft.add_argument("--output", type=Path, required=True)
+    draft.add_argument("--gemini-model", default="gemini-2.5-flash")
     return parser
 
 
@@ -66,6 +82,27 @@ def main(argv: list[str] | None = None) -> int:
                 print("Hinweise:")
                 for warning in report["warnings"]:
                     print(f" - {warning}")
+            return 0
+        if args.command == "draft-script":
+            key = os.getenv("GEMINI_API_KEY", "")
+            writer = GeminiJSON(key, args.gemini_model, max_output_tokens=3600)
+            brief = args.brief.read_text(encoding="utf-8")
+            sources = json.loads(args.sources.read_text(encoding="utf-8"))
+            draft = generate_script(brief, sources, writer)
+            save_draft(draft, args.output)
+            print(f"Entwurf: {args.output / 'draft_script.txt'}")
+            print(f"Quellenmappe: {args.output / 'draft_evidence.json'}")
+            print("WICHTIG: Fakten und Originalquellen redaktionell prüfen.")
+            return 0
+        if args.command == "prepare-render":
+            manifest = prepare_render(
+                args.run, args.media_root, args.assets, args.output,
+                voiceover=args.voiceover, timings_file=args.timings,
+                demo=args.demo, fps=args.fps)
+            print(f"Timeline: {args.output / 'props.json'}")
+            print(f"Media: {args.output / 'public'}")
+            print(f"Szenen: {len(manifest['scenes'])}; Bilder/Rechte: {'Demo' if args.demo else 'Manuell geprüft'}")
+            print(f"Synchronisation: {manifest['timing_quality']}")
             return 0
         path = approve_asset(args.run, args.scene, args.asset, args.role,
                              args.license_evidence, args.visual_evidence)

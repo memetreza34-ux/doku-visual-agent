@@ -28,3 +28,41 @@ jobs:
         run: |
           test -s runs/ci/plan.json
           test -s runs/ci/review.html
+
+  render-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Python
+        run: python -m pip install -e .
+      - name: Build demo timeline
+        run: |
+          python -m doku_visual_agent plan --script examples/volkswagen_60s.txt --fixture examples/demo_assets.json --output runs/ci
+          python -m doku_visual_agent prepare-render --run runs/ci --output runs/ci/render --demo
+      - name: Install Remotion
+        working-directory: remotion
+        run: npm install --no-audit --no-fund
+      - name: Render first 30 frames
+        working-directory: remotion
+        run: |
+          npx remotion render src/index.jsx DokuVideo ../runs/ci/DEMO-1s.mp4 --props ../runs/ci/render/props.json --public-dir ../runs/ci/render/public --frames=0-29 --log=error --concurrency=1
+      - name: Install FFprobe for codec verification
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+      - name: Inspect actual MP4
+        run: |
+          test -s runs/ci/DEMO-1s.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height -of json runs/ci/DEMO-1s.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remotion-demo-1s
+          path: runs/ci/DEMO-1s.mp4
+          retention-days: 7

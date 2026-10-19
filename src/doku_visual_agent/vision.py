@@ -98,13 +98,17 @@ def parse_model_json(value: str) -> dict[str, Any]:
 class GeminiJSON:
     """Minimal no-SDK Gemini adapter, opt-in, bounded responses."""
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash",
+                 max_output_tokens: int = 850):
         if not api_key.strip():
             raise ValueError("GEMINI_API_KEY fehlt.")
         if not re.fullmatch(r"[A-Za-z0-9._-]{3,80}", model):
             raise ValueError("Ungültiger Gemini-Modellname.")
         self._api_key = api_key.strip()
         self.model = model
+        if not 100 <= max_output_tokens <= 8192:
+            raise ValueError("KI-Ausgabegröße außerhalb des erlaubten Rahmens.")
+        self.max_output_tokens = max_output_tokens
 
     def generate(self, prompt: str, image: tuple[bytes, str] | None = None) -> dict[str, Any]:
         parts: list[dict[str, Any]] = [{"text": prompt}]
@@ -119,7 +123,7 @@ class GeminiJSON:
         payload = {
             "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {"responseMimeType": "application/json",
-                                 "temperature": 0, "maxOutputTokens": 850},
+                                 "temperature": 0, "maxOutputTokens": self.max_output_tokens},
         }
         url = "https://generativelanguage.googleapis.com/v1beta/models/" + self.model + ":generateContent"
         request = urllib.request.Request(

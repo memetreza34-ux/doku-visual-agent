@@ -111,6 +111,53 @@ Das Skript wird in der Live-Suche ausschließlich zur Ableitung von Suchanfragen
 
 Pexels hat API-Limits und Richtlinien zur Nutzung. Wikimedia Commons ist keine pauschale kommerzielle Freigabe. Prüfe die Bedingungen jeweils aktuell.
 
+
+
+## Quellengebundener KI-Skriptentwurf (optional)
+
+Der neue CLI-Befehl draft-script erstellt mit Gemini einen deutschen Sprechertext inklusive Quellen-ID-Mapping. Er benötigt eine manuell recherchierte JSON-Datei mit 1–12 Quellen. Nur geprüfte Links und Faktennotizen werden zugelassen. Das ist **keine automatische aktuelle Nachrichtenrecherche und keine garantierte inhaltliche Wahrheit**; alle Aussagen müssen vor Produktion kontrolliert werden.
+
+~~~json
+[
+  {
+    "id": "SRC-VW-1",
+    "title": "Originalquelle mit echtem Titel",
+    "url": "https://example.org/ECHTER_QUELLENLINK",
+    "editor_checked": true,
+    "facts": ["Hier den tatsächlich anhand der Quelle überprüften Fakt vollständig eintragen."]
+  }
+]
+~~~
+
+Die URLs/Texte oben sind eine reine Schemaillustration, keine Volkswagen-Quelle. Das Feld editor_checked darf erst nach echter redaktioneller Quellprüfung auf true gesetzt werden.
+
+~~~bash
+export GEMINI_API_KEY="DEIN_KEY"
+python -m doku_visual_agent draft-script --brief mein_thema.txt --sources quellen.json --output runs/draft
+~~~
+
+Dann entstehen draft_script.txt und draft_evidence.json. Die Skriptdatei kann nach inhaltlicher Freigabe direkt an den bestehenden Unterbefehl plan übergeben werden.
+
+## Phase 2A: Gesteuerter Remotion-Videoexport
+
+Nach der Bildprüfung kann die Pipeline nun eine JSON-Timeline und ein geprüftes Medienpaket für Remotion vorbereiten. Sie synchronisiert die Gesamtdauer des Sprecher-Audios mit den Szenen und erstellt aus freigegebenen Fotos, Clips und belegten Diagrammen eine Video-Timeline. Eine **zuverlässige Wort-Synchronisation** oder automatische KI-Stimme gibt es noch nicht.
+
+### Sichere grafische Demo ohne fremde Medien
+
+~~~bash
+python -m doku_visual_agent plan --script examples/volkswagen_60s.txt --fixture examples/demo_assets.json --output runs/demo
+python -m doku_visual_agent prepare-render --run runs/demo --output runs/demo/render --demo
+cd remotion
+npm install
+npx remotion render src/index.jsx DokuVideo ../runs/demo/DEMO.mp4 --props ../runs/demo/render/props.json --public-dir ../runs/demo/render/public
+~~~
+
+Das Ergebnis ist eine **sichtbar als Demo markierte, stumme Layoutvorschau**. Es zeigt keine recherchierten VW-Fotos und enthält keinen KI-Sprecher.
+
+Für reale Videos sind manuell freigegebene Bilddateien, bindings.json, eine Sprecherdatei und ggf. geprüfte Diagramme nötig. Die Pipeline blockiert fehlende Rechte-/Quellenfreigaben und fehlende Medien. Weitere Informationen: [Phase 2A Anleitung](docs/PHASE_2A.md).
+
+**Offen:** aktuelle Quellenrecherche und Faktensicherheit, eigenständige Skripterstellung, automatische TTS, präzise Sprach-Timestamps, echter Qualitätsbenchmark, 5-10-Minuten-Doku-Praxistest.
+
 ## Entwicklungsstatus
 
 Phase 1B enthält KI-Szenenplanung und die Sichtung einzelner realer Vorschaubilder. Die Implementierung wird mit gemockten Tests geprüft, **nicht** mit einer noch ausstehenden unabhängigen Live-Bildgenauigkeitsmessung. Faktenrecherche und fertiger Videoschnitt folgen erst nach dem Volkswagen-Pilotprojekt.
