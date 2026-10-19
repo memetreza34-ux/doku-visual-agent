@@ -30,8 +30,25 @@ def render_html(plan: dict) -> str:
                      if src else '<div class="placeholder">Keine Vorschau</div>')
             source = safe_https(asset["source_url"])
             licence = safe_https(asset.get("license_url"))
+            v = item.get("vision") or {}
+            status = str(v.get("status", "not_checked"))
+            texts = {"relevant": "KI-Bildsicht: optisch passend (Quelle prüfen)",
+                     "partly_relevant": "KI-Bildsicht: teilweise passend",
+                     "unrelated": "KI-Bildsicht: unpassend – nicht verwenden",
+                     "uncertain": "KI-Bildsicht: unsicher",
+                     "error": "Bildprüfung fehlgeschlagen",
+                     "not_checked": "Noch nicht mit KI geprüft"}
+            verdict = texts.get(status, "Prüfung offen")
+            assessment = (
+                f'<p class="assessment"><strong>{h(verdict)}</strong></p>'
+                f'<p>{h(v.get("observed", ""))}</p>'
+                f'<p>{h(v.get("reasoning", v.get("note", "")))}</p>'
+                f'<p class="small">{h(v.get("context_note", ""))}</p>'
+                + (f'<p class="small">Unsicherheiten: {h("; ".join(v.get("uncertainties", [])))}</p>'
+                   if v.get("uncertainties") else "")
+            )
             items.append(
-                '<article class="asset">' + image +
+                '<article class="asset">' + image + assessment +
                 f'<h4>{h(asset["title"])}</h4>' +
                 f'<p><strong>{h(item["usage_label"])}</strong> · {h(asset["provider"])} / {h(asset["kind"])}</p>' +
                 f'<p>{h(item["why"])} · Score (nur Metadaten): {h(item["metadata_score"])}</p>' +
@@ -48,7 +65,7 @@ def render_html(plan: dict) -> str:
         parts.append(
             f'<section><h2>{h(scene["id"])} · {h(scene["visual_type"])}</h2>'
             f'<blockquote>{h(scene["narration"])}</blockquote>'
-            f'<p><b>Visual-Regel:</b> {h(scene["guidance"])}</p>'
+            f'<p><b>Visual-Regel:</b> {h(scene["guidance"])}</p>'\n            f'<p><b>Visualziel:</b> {h(scene.get("visual_goal", "") or "regelbasiert")}</p>'
             f'<p class="small"><b>Suchaufträge:</b> {h(query_text or "Keine: Datenbeleg für Diagramm erforderlich")}</p>'
             f'<div class="assets">{"".join(items)}</div></section>'
         )
@@ -67,13 +84,13 @@ def render_html(plan: dict) -> str:
         '.asset{background:#101b2d;border:1px solid #35495b;border-radius:10px;padding:12px;overflow:hidden}'
         'img{width:100%;height:145px;object-fit:cover;background:#263449}'
         '.small,.id{color:#b0c4d4;font-size:12px;overflow-wrap:anywhere}'
-        '.warning,.empty{color:#ffcb86;font-weight:600}'
+        '.warning,.empty{color:#ffcb86;font-weight:600}.assessment{color:#9bd4ec}'
         '.notice{padding:12px;border-left:4px solid #f0b45a;background:#33291f}'
         'blockquote{border-left:3px solid #81a2bd;margin:0;padding:8px 16px}'
         '</style></head><body>'
         f'<h1>Doku Visual Agent – Rechercheprüfung{h(demo)}</h1>'
         '<p class="notice">KEIN MATERIAL AUTOMATISCH FREIGEGEBEN. '
-        'Relevanzscore basiert ausschließlich auf Textmetadaten; Bilder, Fakten und Rechte manuell prüfen.</p>'
+        'KI-Bildsicht (falls aktiviert) dient nur als visuelle Einschätzung; Fakten und Rechte manuell prüfen.</p>'
         '<p>Stock-Material mit Bezug zu Unternehmen ist ggf. nur ein Symbolbild. '
         'Offizielle Pexels-API: <a href="https://www.pexels.com/">Pexels</a>.</p>'
         f'{"".join(parts)}'

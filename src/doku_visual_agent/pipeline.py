@@ -6,20 +6,34 @@ from datetime import datetime, timezone
 from dataclasses import asdict
 import json
 from pathlib import Path
+from typing import Any
+
+from .semantic import improve_scene
+from .vision import VisionError
 
 from .core import make_scenes, select_candidates
 from .providers import Commons, FixtureSource, Pexels, ProviderError
 
 
 def build_plan(script: str, *, pexels_key: str = "", fixture: list[dict] | None = None,
-               results_per_task: int = 8, candidates_per_scene: int = 4) -> dict:
+               results_per_task: int = 8, candidates_per_scene: int = 4,
+               semantic_client: Any = None, vision_enabled: bool = False) -> dict:
     scenes = make_scenes(script)
+    warnings = []
+    if semantic_client is not None:
+        updated = []
+        for scene in scenes:
+            try:
+                updated.append(improve_scene(scene, semantic_client))
+            except VisionError as exc:
+                updated.append(scene)  # Preserve conservative original search plan.
+                warnings.append(f"{scene.id}: KI-Suchplanung fehlgeschlagen: {exc}")
+        scenes = updated
     is_demo = fixture is not None
     pexels = Pexels(pexels_key) if not is_demo else FixtureSource(fixture)
     commons = Commons() if not is_demo else pexels
     seen: set[str] = set()
     output = []
-    warnings = []
     search_cache = {}
 
     for scene in scenes:
@@ -38,11 +52,13 @@ def build_plan(script: str, *, pexels_key: str = "", fixture: list[dict] | None 
                     warnings.append(f"{task.provider} / {task.query}: {exc}")
             assets.extend(search_cache[cache_key])
         suggestions = select_candidates(scene, assets, limit=candidates_per_scene,
-                                        already_seen=seen)
+                                        already_seen=seen, allow_weak=vision_enabled)
         output.append({
             "id": scene.id, "narration": scene.narration, "visual_type": scene.visual_type,
             "entity": scene.entity, "place": scene.place, "year": scene.year,
-            "guidance": scene.guidance, "search_tasks": queries,
+            "guidance": scene.guidance, "visual_goal": scene.visual_goal,
+            "semantic_note": scene.semantic_note,
+            "search_tasks": queries,
             "candidates": suggestions,
             "state": "manual_review_needed" if suggestions else "needs_research_or_graphic",
         })
@@ -52,6 +68,7 @@ def build_plan(script: str, *, pexels_key: str = "", fixture: list[dict] | None 
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "mode": "OFFLINE_DEMO_NOT_REAL_MEDIA" if is_demo else "LIVE_SEARCH_UNREVIEWED",
         "publication_ready": False,
+        "planning_mode": "llm_assisted_unverified" if semantic_client is not None else "rule_based",
         "scenes": output,
         "warnings": list(dict.fromkeys(warnings)),
         "notice": "Kein Treffer belegt allein das Dargestellte oder die Nutzungsrechte.",
@@ -80,6 +97,9 @@ def approve_asset(run: Path, scene_id: str, asset_id: str, role: str,
     asset = next((c["asset"] for c in scene["candidates"] if c["asset"]["id"] == asset_id), None)
     if asset is None:
         raise ValueError("Asset steht nicht in der Vorschlagsliste dieser Szene.")
+    if next((c.get("review_status") for c in scene["candidates"]
+             if c["asset"]["id"] == asset_id), None) == "rejected_by_vision":
+        raise ValueError("Von der KI als unpassend aussortiertes Asset; erneut recherchieren.")
     if role == "symbolbild" and scene["visual_type"] != "generic_broll":
         raise ValueError("Konkrete Sachbehauptungen/Ereignisse dürfen nicht durch Symbolbild freigegeben werden.")
     if role == "exakt" and scene["visual_type"] == "generic_broll":

@@ -1,0 +1,122 @@
+[
+  {
+    "text": "Das Volkswagen-Werk in Wolfsburg hat eine lange Tradition.",
+    "visual_type": "specific_location",
+    "entity": "Volkswagen"
+  },
+  {
+    "text": "BMW betreibt ein Werk in Berlin.",
+    "visual_type": "specific_location",
+    "entity": "BMW"
+  },
+  {
+    "text": "Das Tesla Werk nahe Berlin steht in den Nachrichten.",
+    "visual_type": "specific_location",
+    "entity": "Tesla"
+  },
+  {
+    "text": "Das Werk in Zwickau beschäftigt zahlreiche Menschen.",
+    "visual_type": "data_graphic",
+    "entity": ""
+  },
+  {
+    "text": "Das Werk in Zwickau fertigt Elektroautos.",
+    "visual_type": "specific_location",
+    "entity": ""
+  },
+  {
+    "text": "Historische Aufnahmen zeigen eine Montagehalle.",
+    "visual_type": "archive",
+    "entity": ""
+  },
+  {
+    "text": "Früher wurden Autos von Hand gebaut.",
+    "visual_type": "archive",
+    "entity": ""
+  },
+  {
+    "text": "Im Jahr 1960 lief die Fertigung anders ab.",
+    "visual_type": "archive",
+    "entity": ""
+  },
+  {
+    "text": "Eine Aufnahme von 1970 zeigt die Produktion.",
+    "visual_type": "archive",
+    "entity": ""
+  },
+  {
+    "text": "Wie hoch war der Umsatz von Volkswagen?",
+    "visual_type": "data_graphic",
+    "entity": "Volkswagen"
+  },
+  {
+    "text": "Der Gewinn sank im vergangenen Jahr.",
+    "visual_type": "data_graphic",
+    "entity": ""
+  },
+  {
+    "text": "Die Kosten für das Unternehmen steigen.",
+    "visual_type": "data_graphic",
+    "entity": ""
+  },
+  {
+    "text": "Wie viele Millionen wurden investiert?",
+    "visual_type": "data_graphic",
+    "entity": ""
+  },
+  {
+    "text": "Heute kündigte Volkswagen eine neue Strategie an.",
+    "visual_type": "event_evidence",
+    "entity": "Volkswagen"
+  },
+  {
+    "text": "Gestern wurde ein Streik angekündigt.",
+    "visual_type": "event_evidence",
+    "entity": ""
+  },
+  {
+    "text": "Aktuell wird über neue Entwicklungen berichtet.",
+    "visual_type": "event_evidence",
+    "entity": ""
+  },
+  {
+    "text": "Der Vorstand hat Änderungen beschlossen.",
+    "visual_type": "event_evidence",
+    "entity": ""
+  },
+  {
+    "text": "Volkswagen ist ein bedeutender Autohersteller.",
+    "visual_type": "company_image",
+    "entity": "Volkswagen"
+  },
+  {
+    "text": "Bosch entwickelt elektrische Komponenten.",
+    "visual_type": "company_image",
+    "entity": "Bosch"
+  },
+  {
+    "text": "Siemens investiert in moderne Technik.",
+    "visual_type": "company_image",
+    "entity": "Siemens"
+  },
+  {
+    "text": "Roboter montieren Autoteile.",
+    "visual_type": "generic_broll",
+    "entity": ""
+  },
+  {
+    "text": "Elektroautos benötigen moderne Batterien.",
+    "visual_type": "generic_broll",
+    "entity": ""
+  },
+  {
+    "text": "Maschinen schweißen Karosseriebleche.",
+    "visual_type": "generic_broll",
+    "entity": ""
+  },
+  {
+    "text": "Eine Kamera fährt durch einen Lagerraum.",
+    "visual_type": "generic_broll",
+    "entity": ""
+  }
+]
