@@ -131,7 +131,7 @@ def verify_metadata(scene: dict[str, Any], info: dict[str, Any]) -> dict[str, st
     p = urllib.parse.urlsplit(image_url)
     if (p.scheme != "https" or p.hostname != "upload.wikimedia.org"
             or p.port not in (None, 443) or p.username or p.password):
-        raise PilotError(f"{scene['id']}: Bild-URL liegt nicht auf Wikimedia CDN.")
+        raise PilotError(f"{scene['id']}: Bild-URL liegt nicht auf Wikimedia CDN (scheme={p.scheme!r}, host={p.hostname!r}, thumb_present={bool(info.get('thumburl'))}, url_present={bool(info.get('url'))}).")
     return {
         "url": image_url, "source_page": description_url,
         "license_name": lic, "license_url": license_url,
