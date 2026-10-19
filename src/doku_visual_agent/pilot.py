@@ -8,6 +8,7 @@ audio/render path without presenting it as a production-quality narrator.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from html import escape
 import hashlib
 import json
 from pathlib import Path
@@ -241,4 +242,53 @@ def prepare_pilot(manifest_path: Path, output: Path, voiceover: Path,
         "erneut prüfen. Einzelne tatsächliche Aufnahmedaten stammen aus der "
         "manuell kuratierten Shotlist und sind nicht maschinell verifiziert.\n",
         encoding="utf-8")
+
+    cards = []
+    for item, shot in zip(manifest["scenes"], scenes):
+        facts = "".join(
+            '<li><a href="' + escape(u, quote=True) + '" rel="noopener noreferrer">' +
+            escape(u) + "</a></li>" for u in item["fact_source_urls"]
+        )
+        if shot["kind"] == "image":
+            rights = next(c for c in credits if c["scene"] == shot["sceneId"])
+            illustration = (
+                '<img loading="lazy" src="public/' + escape(shot["asset"], quote=True) +
+                '" alt="Dokumentarisches Commons-Foto, Bildinhalt manuell prüfen">'
+            )
+            reference = (
+                '<p>Urheber: ' + escape(rights["creator"]) +
+                " · " + escape(rights["license"]) +
+                ' · <a href="' + escape(rights["source_page"], quote=True) +
+                '" rel="noopener noreferrer">Originalbild</a>' +
+                ' · <a href="' + escape(rights["license_url"], quote=True) +
+                '" rel="noopener noreferrer">Lizenz</a></p>'
+            )
+        else:
+            illustration = '<div class="graphic">Eigene Zeitstrahlgrafik · kein Originalfoto</div>'
+            reference = '<p>Keine Bildlizenz erforderlich, Faktenquellen separat prüfen.</p>'
+        cards.append(
+            '<section><h2>' + escape(item["id"]) + " – " +
+            escape(item["title"]) + '</h2>' + illustration +
+            "<p><strong>Sprecher:</strong> " + escape(item["text"]) + "</p>" +
+            reference + "<p><strong>Faktenquellen:</strong></p><ul>" + facts + "</ul>" +
+            '<p class="warning">Manuell noch offen: Bildaussage · Lizenz-/Attributionspflichten · Audio · Schnitt.</p>' +
+            "</section>"
+        )
+    html = (
+        '<!doctype html><html lang="de"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        "<title>VW-Doku · echte Bildquellen prüfen</title>"
+        '<style>body{font:16px system-ui,sans-serif;background:#0c1724;color:#edf4f8;'
+        'max-width:1000px;margin:auto;padding:30px}a{color:#99d8ff}'
+        'section{border:1px solid #46566b;border-radius:14px;background:#1a283a;'
+        'padding:24px;margin:24px 0}img{width:100%;max-height:440px;object-fit:contain;'
+        'background:#0b1220}.graphic{padding:90px 18px;text-align:center;background:#142f46}'
+        '.warning{color:#ffcf90;font-weight:700}li{overflow-wrap:anywhere}</style>'
+        '</head><body><h1>Volkswagen: Echter Bildtest – redaktionelle Sichtung</h1>'
+        '<p class="warning">NICHT FREIGEGEBEN · technischer Film mit echten Commons-Aufnahmen. '
+        'Commons-Metadaten allein beweisen nicht, dass das Foto im konkreten Zusammenhang '
+        'rechtlich und journalistisch geeignet ist.</p>' +
+        "".join(cards) + "</body></html>"
+    )
+    (output / "review.html").write_text(html, encoding="utf-8")
     return final
