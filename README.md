@@ -111,6 +111,27 @@ Das Skript wird in der Live-Suche ausschließlich zur Ableitung von Suchanfragen
 
 Pexels hat API-Limits und Richtlinien zur Nutzung. Wikimedia Commons ist keine pauschale kommerzielle Freigabe. Prüfe die Bedingungen jeweils aktuell.
 
+
+## Phase 2A: Gesteuerter Remotion-Videoexport
+
+Nach der Bildprüfung kann die Pipeline nun eine JSON-Timeline und ein geprüftes Medienpaket für Remotion vorbereiten. Sie synchronisiert die Gesamtdauer des Sprecher-Audios mit den Szenen und erstellt aus freigegebenen Fotos, Clips und belegten Diagrammen eine Video-Timeline. Eine **zuverlässige Wort-Synchronisation** oder automatische KI-Stimme gibt es noch nicht.
+
+### Sichere grafische Demo ohne fremde Medien
+
+~~~bash
+python -m doku_visual_agent plan --script examples/volkswagen_60s.txt --fixture examples/demo_assets.json --output runs/demo
+python -m doku_visual_agent prepare-render --run runs/demo --output runs/demo/render --demo
+cd remotion
+npm install
+npx remotion render src/index.jsx DokuVideo ../runs/demo/DEMO.mp4 --props ../runs/demo/render/props.json --public-dir ../runs/demo/render/public
+~~~
+
+Das Ergebnis ist eine **sichtbar als Demo markierte, stumme Layoutvorschau**. Es zeigt keine recherchierten VW-Fotos und enthält keinen KI-Sprecher.
+
+Für reale Videos sind manuell freigegebene Bilddateien, bindings.json, eine Sprecherdatei und ggf. geprüfte Diagramme nötig. Die Pipeline blockiert fehlende Rechte-/Quellenfreigaben und fehlende Medien. Weitere Informationen: [Phase 2A Anleitung](docs/PHASE_2A.md).
+
+**Offen:** aktuelle Quellenrecherche und Faktensicherheit, eigenständige Skripterstellung, automatische TTS, präzise Sprach-Timestamps, echter Qualitätsbenchmark, 5-10-Minuten-Doku-Praxistest.
+
 ## Entwicklungsstatus
 
 Phase 1B enthält KI-Szenenplanung und die Sichtung einzelner realer Vorschaubilder. Die Implementierung wird mit gemockten Tests geprüft, **nicht** mit einer noch ausstehenden unabhängigen Live-Bildgenauigkeitsmessung. Faktenrecherche und fertiger Videoschnitt folgen erst nach dem Volkswagen-Pilotprojekt.

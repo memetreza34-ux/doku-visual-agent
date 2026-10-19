@@ -9,3 +9,7 @@ venv/
 runs/
 .pytest_cache/
 .DS_Store
+
+remotion/node_modules/
+remotion/out/
+remotion/.cache/

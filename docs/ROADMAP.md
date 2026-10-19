@@ -20,7 +20,17 @@
 - Authentische Belege stärker bewerten als bloßes Stock-B-Roll
 - **Teilweise:** 24 kuratierte Skriptszenen sowie Vision-Tests mit Mock-Antworten. **Offen:** reale Bilder bewerten und unabhängige Präzisionsmessung
 
-## Danach (Phase 2)
+## Phase 2A: implementierter Renderpfad (Pilot noch offen)
+
+- Python-Timelinegenerator: aus plan.json, Freigaben, lokalen Assets und Sprecherdatei ein Remotion-Paket.
+- Integritäts- und Lizenzfreigabe-Gates für jedes Bild / jeden Clip, kein blindes Einfügen fremder Dateien.
+- Für belegte Daten-Szenen: Diagramm aus explizit geprüften Zahlen.
+- Erste React/Remotion-Komposition: Bewegung, Quellenhinweise, Szenenübergänge, Voiceover-Mix.
+- Demo-Modus mit sichtbarem Kennzeichen; Bildinhalt aus echten Quellen dabei nicht vorgetäuscht.
+- Offen: vollautomatische Faktensuche, Skripte, TTS, Wort-Timing und Live-Videoschnittqualität.
+
+## Danach (Phase 2B)
+
 
 - Audio-/Skript-Timestamps, Sprecher-Synchronisierung
 - Storyboard je Aussage und visuelle Abwechslung
