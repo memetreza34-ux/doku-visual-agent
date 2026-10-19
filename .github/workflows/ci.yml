@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -69,7 +73,8 @@ jobs:
 
   volkswagen-real-photo-pilot:
     # Integration smoke test with genuine Commons images. No API keys.
-    # PR checks must include the real-media pilot: a skipped integration test is not a pass.
+    # Run real-media pilot on PRs; avoid duplicate expensive media downloads on every push.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
