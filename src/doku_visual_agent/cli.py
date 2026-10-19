@@ -10,6 +10,7 @@ import sys
 
 from .pipeline import approve_asset, build_plan, save_plan
 from .production import prepare_render
+from .scriptwriter import generate_script, save_draft
 from .report import save_html
 from .vision import GeminiJSON, GeminiVision, inspect_plan
 
@@ -45,6 +46,11 @@ def make_parser() -> argparse.ArgumentParser:
     production.add_argument("--timings", type=Path, help="Optionale geprüfte Szenendauern in Sekunden als JSON")
     production.add_argument("--demo", action="store_true", help="Nur Offline-Fixture: grafische DEMO ohne reale Medien")
     production.add_argument("--fps", type=int, default=30)
+    draft = subs.add_parser("draft-script", help="Quellengebundenen KI-Skriptentwurf erstellen")
+    draft.add_argument("--brief", type=Path, required=True, help="Textdatei mit Thema und Story-Winkel")
+    draft.add_argument("--sources", type=Path, required=True, help="Manuell geprüfte Faktennotizen als JSON")
+    draft.add_argument("--output", type=Path, required=True)
+    draft.add_argument("--gemini-model", default="gemini-2.5-flash")
     return parser
 
 
@@ -76,6 +82,17 @@ def main(argv: list[str] | None = None) -> int:
                 print("Hinweise:")
                 for warning in report["warnings"]:
                     print(f" - {warning}")
+            return 0
+        if args.command == "draft-script":
+            key = os.getenv("GEMINI_API_KEY", "")
+            writer = GeminiJSON(key, args.gemini_model, max_output_tokens=3600)
+            brief = args.brief.read_text(encoding="utf-8")
+            sources = json.loads(args.sources.read_text(encoding="utf-8"))
+            draft = generate_script(brief, sources, writer)
+            save_draft(draft, args.output)
+            print(f"Entwurf: {args.output / 'draft_script.txt'}")
+            print(f"Quellenmappe: {args.output / 'draft_evidence.json'}")
+            print("WICHTIG: Fakten und Originalquellen redaktionell prüfen.")
             return 0
         if args.command == "prepare-render":
             manifest = prepare_render(

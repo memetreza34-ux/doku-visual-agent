@@ -112,6 +112,32 @@ Das Skript wird in der Live-Suche ausschließlich zur Ableitung von Suchanfragen
 Pexels hat API-Limits und Richtlinien zur Nutzung. Wikimedia Commons ist keine pauschale kommerzielle Freigabe. Prüfe die Bedingungen jeweils aktuell.
 
 
+
+## Quellengebundener KI-Skriptentwurf (optional)
+
+Der neue CLI-Befehl draft-script erstellt mit Gemini einen deutschen Sprechertext inklusive Quellen-ID-Mapping. Er benötigt eine manuell recherchierte JSON-Datei mit 1–12 Quellen. Nur geprüfte Links und Faktennotizen werden zugelassen. Das ist **keine automatische aktuelle Nachrichtenrecherche und keine garantierte inhaltliche Wahrheit**; alle Aussagen müssen vor Produktion kontrolliert werden.
+
+~~~json
+[
+  {
+    "id": "SRC-VW-1",
+    "title": "Originalquelle mit echtem Titel",
+    "url": "https://example.org/ECHTER_QUELLENLINK",
+    "editor_checked": true,
+    "facts": ["Hier den tatsächlich anhand der Quelle überprüften Fakt vollständig eintragen."]
+  }
+]
+~~~
+
+Die URLs/Texte oben sind eine reine Schemaillustration, keine Volkswagen-Quelle. Das Feld editor_checked darf erst nach echter redaktioneller Quellprüfung auf true gesetzt werden.
+
+~~~bash
+export GEMINI_API_KEY="DEIN_KEY"
+python -m doku_visual_agent draft-script --brief mein_thema.txt --sources quellen.json --output runs/draft
+~~~
+
+Dann entstehen draft_script.txt und draft_evidence.json. Die Skriptdatei kann nach inhaltlicher Freigabe direkt an den bestehenden Unterbefehl plan übergeben werden.
+
 ## Phase 2A: Gesteuerter Remotion-Videoexport
 
 Nach der Bildprüfung kann die Pipeline nun eine JSON-Timeline und ein geprüftes Medienpaket für Remotion vorbereiten. Sie synchronisiert die Gesamtdauer des Sprecher-Audios mit den Szenen und erstellt aus freigegebenen Fotos, Clips und belegten Diagrammen eine Video-Timeline. Eine **zuverlässige Wort-Synchronisation** oder automatische KI-Stimme gibt es noch nicht.
