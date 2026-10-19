@@ -132,12 +132,15 @@ def verify_metadata(scene: dict[str, Any], info: dict[str, Any]) -> dict[str, st
     # Validate the exact host AND endpoint; never allow arbitrary external URLs.
     candidates = [str(info.get("thumburl") or ""), str(info.get("url") or "")]
     image_url = next((u for u in candidates if allowed_commons_image_url(u)), "")
-    p = urllib.parse.urlsplit(image_url)
     if not image_url:
-        reported = [(urllib.parse.urlsplit(u).hostname if u else None)
-                    for u in candidates]
-        raise PilotError(f"{scene['id']}: kein zulässiger Wikimedia-Bildendpunkt; "
-                         f"gemeldete Hosts={reported}.")
+        # The Commons API sometimes returns an alternate delivery host. Never
+        # follow it. Ask Wikimedia's documented Special:FilePath endpoint
+        # for the SAME curated, API-verified file instead.
+        title = scene["commons_title"].removeprefix("File:").replace(" ", "_")
+        image_url = ("https://commons.wikimedia.org/wiki/Special:FilePath/" +
+                     urllib.parse.quote(title, safe="()_-.") + "?width=1600")
+        if not allowed_commons_image_url(image_url):
+            raise PilotError(f"{scene['id']}: kein sicherer Wikimedia-Fallback.")
     return {
         "url": image_url, "source_page": description_url,
         "license_name": lic, "license_url": license_url,

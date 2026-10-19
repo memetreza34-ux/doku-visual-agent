@@ -108,6 +108,16 @@ class PilotTests(unittest.TestCase):
         info["url"] = "https://upload.wikimedia.org/wikipedia/commons/a/ab/photo.jpg"
         self.assertEqual(verify_metadata(scene, info)["url"], info["url"])
 
+    def test_unrecognized_api_hosts_use_verified_file_path_fallback(self):
+        scene = MANIFEST["scenes"][0]
+        info = fake_info(scene)
+        info["thumburl"] = "https://untrusted-media.example/picture.jpg"
+        info["url"] = "https://untrusted-media.example/original.jpg"
+        url = verify_metadata(scene, info)["url"]
+        self.assertTrue(url.startswith("https://commons.wikimedia.org/wiki/Special:FilePath/"))
+        self.assertIn("Wolfsburg_Volkswagen_Plant.jpg", url)
+        self.assertTrue(allowed_commons_image_url(url))
+
     def test_accepts_commons_thumbnail_delivery(self):
         scene = MANIFEST["scenes"][0]
         info = fake_info(scene)
