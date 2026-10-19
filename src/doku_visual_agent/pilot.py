@@ -127,11 +127,17 @@ def verify_metadata(scene: dict[str, Any], info: dict[str, Any]) -> dict[str, st
     if not (isinstance(description_url, str)
             and description_url.startswith("https://commons.wikimedia.org/wiki/File:")):
         raise PilotError(f"{scene['id']}: Commons-Originalseite nicht vorhanden.")
-    image_url = str(info.get("thumburl") or info.get("url") or "")
+    # Wikimedia imageinfo may yield an upload.wikimedia.org CDN URL or a
+    # Special:FilePath/thumbnail endpoint on commons.wikimedia.org.
+    # Validate the exact host AND endpoint; never allow arbitrary external URLs.
+    candidates = [str(info.get("thumburl") or ""), str(info.get("url") or "")]
+    image_url = next((u for u in candidates if allowed_commons_image_url(u)), "")
     p = urllib.parse.urlsplit(image_url)
-    if (p.scheme != "https" or p.hostname != "upload.wikimedia.org"
-            or p.port not in (None, 443) or p.username or p.password):
-        raise PilotError(f"{scene['id']}: Bild-URL liegt nicht auf Wikimedia CDN (scheme={p.scheme!r}, host={p.hostname!r}, thumb_present={bool(info.get('thumburl'))}, url_present={bool(info.get('url'))}).")
+    if not image_url:
+        reported = [(urllib.parse.urlsplit(u).hostname if u else None)
+                    for u in candidates]
+        raise PilotError(f"{scene['id']}: kein zulässiger Wikimedia-Bildendpunkt; "
+                         f"gemeldete Hosts={reported}.")
     return {
         "url": image_url, "source_page": description_url,
         "license_name": lic, "license_url": license_url,
@@ -139,23 +145,41 @@ def verify_metadata(scene: dict[str, Any], info: dict[str, Any]) -> dict[str, st
     }
 
 
+def allowed_commons_image_url(url: str) -> bool:
+    """Allow the original Wikimedia CDN and its documented thumbnail/file paths."""
+    try:
+        p = urllib.parse.urlsplit(url)
+        if (p.scheme != "https" or p.port not in (None, 443)
+                or p.username or p.password or not p.hostname):
+            return False
+        if p.hostname == "upload.wikimedia.org":
+            return p.path.startswith("/wikipedia/commons/")
+        if p.hostname == "commons.wikimedia.org":
+            return (p.path == "/w/thumb.php" or
+                    p.path.startswith("/wiki/Special:FilePath/") or
+                    p.path.startswith("/wiki/Special:Redirect/file/"))
+        return False
+    except ValueError:
+        return False
+
+
 class NoRedirectExceptCommons(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        p = urllib.parse.urlsplit(newurl)
-        if p.scheme != "https" or p.hostname != "upload.wikimedia.org":
+        if not allowed_commons_image_url(newurl):
             raise PilotError("Externe Wikimedia-Weiterleitung gesperrt.")
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def download_photo(url: str) -> bytes:
+    if not allowed_commons_image_url(url):
+        raise PilotError("Nicht erlaubte Wikimedia-Bildadresse.")
     opener = urllib.request.build_opener(NoRedirectExceptCommons())
     try:
         request = urllib.request.Request(url, headers={
             "User-Agent": USER_AGENT, "Accept": "image/jpeg,image/png",
         })
         with opener.open(request, timeout=30) as response:
-            p = urllib.parse.urlsplit(response.geturl())
-            if p.scheme != "https" or p.hostname != "upload.wikimedia.org":
+            if not allowed_commons_image_url(response.geturl()):
                 raise PilotError("Unerwartetes Bildziel.")
             declared = int(response.headers.get("Content-Length", "0"))
             if declared > MAX_PHOTO_BYTES:

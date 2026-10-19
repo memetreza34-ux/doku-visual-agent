@@ -24,6 +24,12 @@ class TTSError(ValueError):
     pass
 
 
+class NoKeyRedirect(urllib.request.HTTPRedirectHandler):
+    """Never forward the Gemini API key to a redirected host."""
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        raise TTSError("TTS-Redirect verweigert (API-Key-Schutz).")
+
+
 def build_tts_request(transcript: str, voice: str, model: str) -> dict[str, Any]:
     if model not in SUPPORTED_MODELS:
         raise TTSError("Nicht unterstütztes TTS-Modell.")
@@ -82,7 +88,8 @@ def tts_gemini(transcript: str, api_key: str, *,
                  "User-Agent": "DokuVisualAgent/0.3; opt-in TTS"},
     )
     try:
-        with urllib.request.urlopen(req, timeout=100) as response:
+        opener = urllib.request.build_opener(NoKeyRedirect())
+        with opener.open(req, timeout=100) as response:
             raw = response.read(MAX_RESPONSE_BYTES + 1)
         if len(raw) > MAX_RESPONSE_BYTES:
             raise TTSError("Gemini-TTS-Antwort zu groß.")

@@ -188,3 +188,7 @@ npx remotion render src/index.jsx DokuVideo ../runs/pilot/VW-PILOT.mp4 --props .
 ~~~
 
 Schritte, geprüfte Quellen und verbleibende Veröffentlichungshürden: [Doku-Pilot-Protokoll](docs/VW_PILOT.md).
+
+## Übergabe an Gemini
+
+Für die weiteren Qualitäts- und Automatisierungsschritte siehe [GEMINI_HANDOFF.md](docs/GEMINI_HANDOFF.md). Der aktuelle VW-Pilot ist technisch eine **interne Testproduktion**, kein freigegebenes Veröffentlichungsasset. Die Readiness ist in `docs/GEMINI_HANDOFF.md` mit klaren Gates und Kommandos dokumentiert.

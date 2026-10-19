@@ -43,8 +43,8 @@ class TTSTests(unittest.TestCase):
 
     def test_api_key_not_echoed_on_network_error(self):
         import urllib.error
-        with patch("doku_visual_agent.tts.urllib.request.urlopen",
-                   side_effect=urllib.error.URLError("something failed")):
+        with patch("doku_visual_agent.tts.urllib.request.build_opener") as factory:
+            factory.return_value.open.side_effect = urllib.error.URLError("something failed")
             with self.assertRaises(TTSError) as exc:
                 tts_gemini("Ein deutscher Testtext mit ausreichender Länge zum Vertonen.",
                            "sk-private-secret")

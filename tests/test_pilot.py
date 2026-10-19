@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from doku_visual_agent.pilot import (
     PilotError, validate_manifest, verify_metadata,
-    write_narration, prepare_pilot, download_photo,
+    write_narration, prepare_pilot, download_photo, allowed_commons_image_url,
 )
 
 MANIFEST = json.loads((Path(__file__).resolve().parent.parent / "examples" /
@@ -81,6 +81,38 @@ class PilotTests(unittest.TestCase):
         wrong["extmetadata"]["Artist"]["value"] = "Unknown"
         with self.assertRaisesRegex(PilotError, "Autorennachweis"):
             verify_metadata(scene, wrong)
+
+    def test_whitelisted_commons_thumbnail_paths(self):
+        urls = [
+            "https://upload.wikimedia.org/wikipedia/commons/a/ab/photo.jpg",
+            "https://commons.wikimedia.org/w/thumb.php?f=photo.jpg&w=1600",
+            "https://commons.wikimedia.org/wiki/Special:FilePath/photo.jpg",
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/photo.jpg",
+        ]
+        self.assertTrue(all(allowed_commons_image_url(url) for url in urls))
+        for forbidden in [
+            "https://commons.wikimedia.org.evil.test/w/thumb.php",
+            "https://commons.wikimedia.org/wiki/Main_Page",
+            "https://localhost/internal.jpg",
+            "https://upload.wikimedia.org/other/file.jpg",
+            "http://upload.wikimedia.org/wikipedia/commons/file.jpg",
+            "https://upload.wikimedia.org:444/wikipedia/commons/file.jpg",
+        ]:
+            with self.subTest(url=forbidden):
+                self.assertFalse(allowed_commons_image_url(forbidden))
+
+    def test_prefers_cdn_after_unrecognized_thumbnail(self):
+        scene = MANIFEST["scenes"][0]
+        info = fake_info(scene)
+        info["thumburl"] = "https://unsupported.example.org/photo.jpg"
+        info["url"] = "https://upload.wikimedia.org/wikipedia/commons/a/ab/photo.jpg"
+        self.assertEqual(verify_metadata(scene, info)["url"], info["url"])
+
+    def test_accepts_commons_thumbnail_delivery(self):
+        scene = MANIFEST["scenes"][0]
+        info = fake_info(scene)
+        info["thumburl"] = "https://commons.wikimedia.org/w/thumb.php?f=example.jpg&w=1600"
+        self.assertEqual(verify_metadata(scene, info)["url"], info["thumburl"])
 
     def test_bogus_media_host_blocked(self):
         scene = MANIFEST["scenes"][0]

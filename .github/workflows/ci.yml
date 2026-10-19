@@ -69,7 +69,7 @@ jobs:
 
   volkswagen-real-photo-pilot:
     # Integration smoke test with genuine Commons images. No API keys.
-    if: github.event_name == 'push'
+    # PR checks must include the real-media pilot: a skipped integration test is not a pass.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
