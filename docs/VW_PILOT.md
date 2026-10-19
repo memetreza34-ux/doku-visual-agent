@@ -49,3 +49,7 @@ Das Modul verwendet `gemini-3.8-flash-tts` über Googles dokumentierte Interacti
 ## Quality Gate vor Ausbau
 
 Echter Render und nachgewiesene Streams, vier eindeutige reale Fotodateien, Originalseiten+Lizenzmetadaten+SHA256, keine unpassenden Firmenbilder, klar markierte Demo, keine erfundenen aktuellen Ereignisse; danach tatsächliche Bild-/Schnitt- und Lizenzkontrolle. Erst anschließend hochwertigen TTS, Animationstuning, B-Rolls und vollständiges Autoformat entwickeln.
+
+## Visuelles Review
+
+Nach `pilot-prepare` liegt `runs/pilot/render/review.html` vor. Es zeigt jede echte Bildvorschau neben Sprechertext, Fotograf, Lizenz und Faktenquellen. Die Datei und vier Bilder werden dem GitHub-Actions-Artefakt beigelegt. Damit lässt sich **jede Szene** vor dem Upload beurteilen; das Review schaltet die Veröffentlichung nicht automatisch frei.

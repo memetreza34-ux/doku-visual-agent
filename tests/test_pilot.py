@@ -132,6 +132,10 @@ class PilotTests(unittest.TestCase):
             self.assertTrue(all(x["manual_license_review_complete"] is False
                                 for x in credits))
             self.assertTrue((output / "public" / "media" / "S01.jpg").exists())
+            html = (output / "review.html").read_text(encoding="utf-8")
+            self.assertIn("Jorge Franganillo", html)
+            self.assertIn("nicht", html.lower())
+            self.assertIn("Foto", html)
             self.assertTrue((output / "public" / "media" / "narration.wav").exists())
 
     def test_will_not_use_wrong_file_type_as_narration(self):

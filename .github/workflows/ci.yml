@@ -136,6 +136,8 @@ jobs:
           path: |
             runs/pilot/VW-PILOT-NICHT-VEROEFFENTLICHEN.mp4
             runs/pilot/render/credits.json
+            runs/pilot/render/review.html
+            runs/pilot/render/public/media/*.jpg
             runs/pilot/render/rights_to_review.md
             runs/pilot/technical_probe.json
             runs/pilot/shotlist.json
