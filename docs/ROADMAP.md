@@ -38,6 +38,14 @@
 - Renderpipeline, Export und Qualitätskontrolle
 - Keine Veröffentlichung ohne Freigabegates
 
+## Praxis-Pilot: Volkswagen Wolfsburg (Implementierung im Test)
+
+- Sechs Abschnitte (vier echte kuratierte Commons-Fotos, zwei originale Zeitstrahlgrafiken).
+- Original-Quelle und gemeldete CC-Lizenz/Autor über Commons-API bei jedem Render prüfen.
+- Espeak-Teststimme (qualitativ **nicht** die Zielstimme), Remotion-MP4 und Quellenjournal.
+- GitHub-Actions-Job mit echten Bildern, vollständigem MP4 und Audio-Stream-Prüfung.
+- **Offen:** unabhängige Bild-/Rechteprüfung, veröffentlichungsreife Stimme, B-Roll, Schnittbewertung und Quellenaktuallität.
+
 ## Später (Phase 3)
 
 - Kontinuierliches Lernen aus Korrekturen, ohne blindes Umschreiben von Regeln

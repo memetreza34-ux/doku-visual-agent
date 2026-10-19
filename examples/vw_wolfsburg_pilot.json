@@ -1,0 +1,93 @@
+{
+  "pilot_id": "wolfsburg_history_01",
+  "title": "Volkswagen: Vom Käfer zur Autofabrik der Gegenwart",
+  "subject": "Historische Entwicklung des Wolfsburger Stammwerks, kein Nachrichtenrückblick",
+  "research_status": "human_curated_sources_not_final_license_clearance",
+  "sources": [
+    {
+      "name": "Volkswagen Newsroom / Wolfsburg plant",
+      "url": "https://www.volkswagen-newsroom.com/en/wolfsburg-plant-the-heart-of-the-vw-brand-6811",
+      "used_for": "1938, 1945, 1974, rund 6,5 Quadratkilometer",
+      "date_status": "Stand der historischen Werksinfos, keine Prognose"
+    },
+    {
+      "name": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/Category:Volkswagenwerk_Wolfsburg",
+      "used_for": "Fotografie und Bildlizenzhinweise"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "S01",
+      "kind": "photo",
+      "title": "Wolfsburg heute",
+      "text": "Ein Blick auf Wolfsburg. Hier liegt das Stammwerk von Volkswagen. Ein Standort, der die Geschichte der deutschen Autoindustrie über Jahrzehnte mitgeprägt hat.",
+      "commons_title": "File:Wolfsburg Volkswagen Plant.jpg",
+      "expected_author": "Jorge Franganillo",
+      "expected_license": "CC BY 4.0",
+      "capture_year": 2025,
+      "fact_source_urls": [
+        "https://www.volkswagen-newsroom.com/en/wolfsburg-plant-the-heart-of-the-vw-brand-6811",
+        "https://commons.wikimedia.org/wiki/File:Wolfsburg_Volkswagen_Plant.jpg"
+      ]
+    },
+    {
+      "id": "S02",
+      "kind": "graphic",
+      "title": "1938: Der Werksbau",
+      "text": "Die Geschichte des Werkes beginnt im Jahr neunzehnhundertachtunddreißig. Nach dem Zweiten Weltkrieg startet im Jahr neunzehnhundertfünfundvierzig die Serienproduktion des Käfers.",
+      "fact_source_urls": [
+        "https://www.volkswagen-newsroom.com/en/wolfsburg-plant-the-heart-of-the-vw-brand-6811"
+      ]
+    },
+    {
+      "id": "S03",
+      "kind": "photo",
+      "title": "Fertigung im Jahr 1960",
+      "text": "Diese historische Fotografie stammt aus dem Oktober neunzehnhundertsechzig. Sie zeigt die damalige Montage innerhalb des Volkswagenwerks in Wolfsburg.",
+      "commons_title": "File:Wolfsburg - Inside the Volkswagen Plant.jpg",
+      "expected_author": "Roger Wollstadt",
+      "expected_license": "CC BY-SA 2.0",
+      "capture_year": 1960,
+      "fact_source_urls": [
+        "https://commons.wikimedia.org/wiki/File:Wolfsburg_-_Inside_the_Volkswagen_Plant.jpg"
+      ]
+    },
+    {
+      "id": "S04",
+      "kind": "photo",
+      "title": "Karosserie trifft Fahrgestell",
+      "text": "Eine zweite Aufnahme aus demselben Monat zeigt eine entscheidende Station: Die Karosserie wird von oben auf das Fahrgestell gesetzt. Echte Werksgeschichte statt eines beliebigen Fabrikvideos.",
+      "commons_title": "File:Wolfsburg - Volkswagen Assembly Line.jpg",
+      "expected_author": "Roger Wollstadt",
+      "expected_license": "CC BY-SA 2.0",
+      "capture_year": 1960,
+      "fact_source_urls": [
+        "https://commons.wikimedia.org/wiki/File:Wolfsburg_-_Volkswagen_Assembly_Line.jpg"
+      ]
+    },
+    {
+      "id": "S05",
+      "kind": "graphic",
+      "title": "1974: Der Golf beginnt",
+      "text": "Im Jahr neunzehnhundertvierundsiebzig endet in Wolfsburg die Käferproduktion. Gleichzeitig startet die Serienproduktion des Golf. Für das Werk beginnt eine neue Ära.",
+      "fact_source_urls": [
+        "https://www.volkswagen-newsroom.com/en/wolfsburg-plant-the-heart-of-the-vw-brand-6811"
+      ]
+    },
+    {
+      "id": "S06",
+      "kind": "photo",
+      "title": "Ein Werk von gewaltiger Größe",
+      "text": "Wie groß das Areal ist, zeigt dieses Luftbild aus dem Jahr zweitausendvierundzwanzig. Volkswagen nennt für den Standort eine Fläche von rund sechseinhalb Quadratkilometern. Doch welche Technologien bestimmen seine Zukunft?",
+      "commons_title": "File:Aerial image of the Wolfsburg Volkswagen Plant (view from the southeast).jpg",
+      "expected_author": "Carsten Steger",
+      "expected_license": "CC BY-SA 4.0",
+      "capture_year": 2024,
+      "fact_source_urls": [
+        "https://www.volkswagen-newsroom.com/en/wolfsburg-plant-the-heart-of-the-vw-brand-6811",
+        "https://commons.wikimedia.org/wiki/File:Aerial_image_of_the_Wolfsburg_Volkswagen_Plant_(view_from_the_southeast).jpg"
+      ]
+    }
+  ]
+}

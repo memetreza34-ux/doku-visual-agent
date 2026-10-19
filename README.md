@@ -161,3 +161,34 @@ Für reale Videos sind manuell freigegebene Bilddateien, bindings.json, eine Spr
 ## Entwicklungsstatus
 
 Phase 1B enthält KI-Szenenplanung und die Sichtung einzelner realer Vorschaubilder. Die Implementierung wird mit gemockten Tests geprüft, **nicht** mit einer noch ausstehenden unabhängigen Live-Bildgenauigkeitsmessung. Faktenrecherche und fertiger Videoschnitt folgen erst nach dem Volkswagen-Pilotprojekt.
+
+### Optionale natürliche Sprecherstimme (Gemini TTS)
+
+Für eine natürlichere Teststimme lässt sich statt `espeak-ng` die offizielle Gemini-TTS-API verwenden. Dafür ist ein eigener API-Schlüssel nötig; die Nutzung kann Kosten verursachen. Ein Skript bleibt exakt die Textvorlage, aber eine hörbare Qualitäts-/Wortlautkontrolle ist trotzdem Pflicht.
+
+```bash
+export GEMINI_API_KEY="DEIN_KEY"
+python -m doku_visual_agent tts-gemini --script runs/pilot/narration.txt --output runs/pilot/narration.wav --voice Kore
+```
+
+Das Modul verwendet `gemini-3.8-flash-tts` über Googles dokumentierte Interactions-API und akzeptiert nur gültige WAV-Dateien. Ohne Schlüssel bleibt der kostenlose, aber deutlich weniger natürliche `espeak-ng`-Test nutzbar. Die laufenden GitHub-Actions-Tests geben bewusst kein Geld für Gemini aus.
+
+## Pilot mit echten Wikimedia-Bildern (Oktober 2026)
+
+Ein **konkret kuratierter historischer VW-Test** liegt in `examples/vw_wolfsburg_pilot.json`: 4 verschiedene echte Wolfsburg-Fotos (1960, 2024 und 2025), 2 eigene Zeitstrahlgrafiken und ein aus offiziellen/Originalquellen zusammengestelltes Skript. Auf GitHub Actions erstellt der Job `volkswagen-real-photo-pilot` ein tatsächlich vertontes MP4 (technische, **roboterhafte** deutsche Teststimme mit `espeak-ng`). Die Quelle, Autor und CC-Lizenz jedes Fotos werden bei der API-Abfrage erneut überprüft; Abweichungen brechen den Test ab.
+
+**Dieser Test ist absichtlich kein freigegebenes Video:** sichtbare Demo-Markierung, Rechte-/ShareAlike-Prüfung offen, Bildinhalte nur über Metadaten verifiziert, noch keine professionelle Stimme oder Wort-Timing. Kein GitHub-API-Key für die Bilder erforderlich. Die richtige Bildauswahl, kommerzielle Lizenzpflichten und Audiostil sind vor YouTube-Veröffentlichung separat abzunehmen.
+
+~~~bash
+python -m doku_visual_agent pilot-script --manifest examples/vw_wolfsburg_pilot.json --output runs/pilot
+espeak-ng -v de -s 153 -f runs/pilot/narration.txt -w runs/pilot/narration.wav
+python -m doku_visual_agent pilot-prepare --manifest examples/vw_wolfsburg_pilot.json --voiceover runs/pilot/narration.wav --output runs/pilot/render
+cd remotion && npm install
+npx remotion render src/index.jsx DokuVideo ../runs/pilot/VW-PILOT.mp4 --props ../runs/pilot/render/props.json --public-dir ../runs/pilot/render/public
+~~~
+
+Schritte, geprüfte Quellen und verbleibende Veröffentlichungshürden: [Doku-Pilot-Protokoll](docs/VW_PILOT.md).
+
+## Übergabe an Gemini
+
+Für die weiteren Qualitäts- und Automatisierungsschritte siehe [GEMINI_HANDOFF.md](docs/GEMINI_HANDOFF.md). Der aktuelle VW-Pilot ist technisch eine **interne Testproduktion**, kein freigegebenes Veröffentlichungsasset. Die Readiness ist in `docs/GEMINI_HANDOFF.md` mit klaren Gates und Kommandos dokumentiert.

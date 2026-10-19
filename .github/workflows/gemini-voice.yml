@@ -1,0 +1,51 @@
+name: Gemini German Voice (manual only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Require configured API secret (no automatic paid calls)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "Repository Actions secret GEMINI_API_KEY is missing."
+            exit 1
+          fi
+      - name: Install Python package
+        run: python -m pip install -e .
+      - name: Create curated pilot narration
+        run: python -m doku_visual_agent pilot-script --manifest examples/vw_wolfsburg_pilot.json --output runs/gemini-voice
+      - name: Generate German WAV using Gemini TTS (API costs possible)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python -m doku_visual_agent tts-gemini --script runs/gemini-voice/narration.txt --output runs/gemini-voice/narration.wav --voice Kore
+      - name: Validate audio container and length
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import wave
+          p = Path("runs/gemini-voice/narration.wav")
+          with wave.open(str(p), "rb") as f:
+              duration = f.getnframes() / f.getframerate()
+              assert 15 <= duration <= 160, duration
+              print(f"Gemini TTS generated {duration:.1f}s of WAV; editorial listening still required")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: german-gemini-narration-review-only
+          path: |
+            runs/gemini-voice/narration.txt
+            runs/gemini-voice/narration.wav
+          retention-days: 7

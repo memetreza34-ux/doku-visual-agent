@@ -11,6 +11,8 @@ import sys
 from .pipeline import approve_asset, build_plan, save_plan
 from .production import prepare_render
 from .scriptwriter import generate_script, save_draft
+from .pilot import write_narration, prepare_pilot
+from .tts import save_tts
 from .report import save_html
 from .vision import GeminiJSON, GeminiVision, inspect_plan
 
@@ -51,6 +53,18 @@ def make_parser() -> argparse.ArgumentParser:
     draft.add_argument("--sources", type=Path, required=True, help="Manuell geprüfte Faktennotizen als JSON")
     draft.add_argument("--output", type=Path, required=True)
     draft.add_argument("--gemini-model", default="gemini-2.5-flash")
+    pilot_script = subs.add_parser("pilot-script", help="Quellenkuratiertes Wolfsburg-Demo-Skript ausgeben")
+    pilot_script.add_argument("--manifest", type=Path, required=True)
+    pilot_script.add_argument("--output", type=Path, required=True)
+    pilot_build = subs.add_parser("pilot-prepare", help="Echte Commons-Fotos und Audiostimme in einen Pilot-Render packen")
+    pilot_build.add_argument("--manifest", type=Path, required=True)
+    pilot_build.add_argument("--output", type=Path, required=True)
+    pilot_build.add_argument("--voiceover", type=Path, required=True)
+    voice = subs.add_parser("tts-gemini", help="Natürliche TTS-Stimme über Gemini (API-Schlüssel erforderlich)")
+    voice.add_argument("--script", type=Path, required=True)
+    voice.add_argument("--output", type=Path, required=True)
+    voice.add_argument("--voice", default="Kore")
+    voice.add_argument("--model", default="gemini-3.8-flash-tts")
     return parser
 
 
@@ -82,6 +96,24 @@ def main(argv: list[str] | None = None) -> int:
                 print("Hinweise:")
                 for warning in report["warnings"]:
                     print(f" - {warning}")
+            return 0
+        if args.command == "tts-gemini":
+            output = save_tts(args.script, args.output, os.getenv("GEMINI_API_KEY", ""),
+                              voice=args.voice, model=args.model)
+            print(f"TTS-Datei: {output}")
+            print("Stimme vor Veröffentlichung anhören und mit dem Skript abgleichen.")
+            return 0
+        if args.command == "pilot-script":
+            path = write_narration(args.manifest, args.output)
+            print(f"Sprechskript: {path}")
+            print("PILOT: historische Quellen, keine aktuellen Unternehmensnachrichten.")
+            return 0
+        if args.command == "pilot-prepare":
+            props = prepare_pilot(args.manifest, args.output, args.voiceover)
+            print(f"Bild-Timeline: {args.output / 'props.json'}")
+            print(f"Rechtejournal: {args.output / 'credits.json'}")
+            print(f"Gesamtdauer (geschätzt): {props['durationInFrames'] / props['fps']:.1f} s")
+            print("NICHT VERÖFFENTLICHEN: Bildrechte und exakte Zuordnung nicht abschließend geprüft.")
             return 0
         if args.command == "draft-script":
             key = os.getenv("GEMINI_API_KEY", "")

@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -65,4 +69,81 @@ jobs:
         with:
           name: remotion-demo-1s
           path: runs/ci/DEMO-1s.mp4
+          retention-days: 7
+
+  volkswagen-real-photo-pilot:
+    # Integration smoke test with genuine Commons images. No API keys.
+    # Run real-media pilot on PRs; avoid duplicate expensive media downloads on every push.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install voice and media tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg espeak-ng
+      - name: Install Python package
+        run: python -m pip install -e .
+      - name: Produce historical script and robotic technical test narration
+        run: |
+          python -m doku_visual_agent pilot-script --manifest examples/vw_wolfsburg_pilot.json --output runs/pilot
+          espeak-ng -v de -s 153 -f runs/pilot/narration.txt -w runs/pilot/narration.wav
+      - name: Resolve actual photo metadata, check CC licenses and stage preview files
+        run: |
+          python -m doku_visual_agent pilot-prepare \
+            --manifest examples/vw_wolfsburg_pilot.json \
+            --voiceover runs/pilot/narration.wav \
+            --output runs/pilot/render
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('runs/pilot/render/props.json').read_text())
+          seconds=data['durationInFrames']/data['fps']
+          assert 40 <= seconds <= 95, seconds
+          assert sum(s['kind']=='image' for s in data['scenes']) == 4
+          assert data['demo'] is True and data['publication_ready'] is False
+          print(f"Pilot: {seconds:.1f}s, {len(data['scenes'])} shots, 4 genuine Commons photographs")
+          PY
+      - name: Install Remotion
+        working-directory: remotion
+        run: npm install --no-audit --no-fund
+      - name: Render full historically sourced pilot (half-scale CI preview)
+        working-directory: remotion
+        run: |
+          npx remotion render src/index.jsx DokuVideo ../runs/pilot/VW-PILOT-NICHT-VEROEFFENTLICHEN.mp4 \
+            --props ../runs/pilot/render/props.json \
+            --public-dir ../runs/pilot/render/public \
+            --scale 0.5 --log=error --concurrency=2
+      - name: Verify video actually contains picture and voiceover
+        run: |
+          test -s runs/pilot/VW-PILOT-NICHT-VEROEFFENTLICHEN.mp4
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height \
+            -of json runs/pilot/VW-PILOT-NICHT-VEROEFFENTLICHEN.mp4 > runs/pilot/technical_probe.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('runs/pilot/technical_probe.json').read_text())
+          assert any(s['codec_type']=='video' for s in p['streams'])
+          assert any(s['codec_type']=='audio' for s in p['streams'])
+          print("Video and audio streams verified")
+          PY
+      - name: Upload review-only pilot with image license journal
+        uses: actions/upload-artifact@v4
+        with:
+          name: volkswagen-60s-real-photo-pilot-review-only
+          path: |
+            runs/pilot/VW-PILOT-NICHT-VEROEFFENTLICHEN.mp4
+            runs/pilot/render/credits.json
+            runs/pilot/render/review.html
+            runs/pilot/render/public/media/*.jpg
+            runs/pilot/render/rights_to_review.md
+            runs/pilot/technical_probe.json
+            runs/pilot/shotlist.json
           retention-days: 7
